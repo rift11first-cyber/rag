@@ -4,7 +4,7 @@ Local-first RAG stack with:
 
 - Python FastAPI backend
 - Plain JavaScript frontend served by FastAPI
-- `BAAI/bge-m3` embeddings
+- `gemini-embedding-2` embeddings
 - Local Qdrant storage
 - Tesseract OCR fallback for scanned PDFs and images
 - Hybrid retrieval with BM25 + dense search + RRF

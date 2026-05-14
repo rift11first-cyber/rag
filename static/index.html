@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RAG Workspace — Retrieval Augmented Generation</title>
+  <meta name="description" content="A production-grade local RAG workspace for document ingestion, semantic querying, and RAGAS evaluation.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+          <polyline points="2 17 12 22 22 17"/>
+          <polyline points="2 12 12 17 22 12"/>
+        </svg>
+      </div>
+      <span class="brand-name">RAG<span class="brand-dot">.</span>workspace</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-tab="workspace" id="nav-workspace">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <span>Workspace</span>
+      </button>
+      <button class="nav-item" data-tab="query" id="nav-query">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <span>Query</span>
+      </button>
+      <button class="nav-item" data-tab="ragas" id="nav-ragas">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        <span>RAGAS</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="system-status" id="system-status">
+        <div class="status-dot" id="status-dot"></div>
+        <div class="status-text">
+          <span id="health-badge">Connecting...</span>
+          <span class="status-sub" id="model-badge"></span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content" id="main-content">
+
+    <!-- Header -->
+    <header class="topbar">
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <h1 class="page-title" id="page-title">Workspace</h1>
+      <div class="topbar-actions">
+        <div class="config-pill" id="config-pill" title="Current configuration">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span id="config-label">Loading...</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ==================== WORKSPACE TAB ==================== -->
+    <section class="tab-content active" id="tab-workspace">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Document Ingestion</h2>
+          <p class="section-desc">Upload and manage your knowledge base documents</p>
+        </div>
+      </div>
+
+      <div class="workspace-grid">
+        <!-- Upload Panel -->
+        <div class="card card-upload" id="card-upload">
+          <div class="card-header">
+            <div class="card-icon upload-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <h3>Upload Files</h3>
+          </div>
+          <form id="upload-form" class="upload-form">
+            <label class="dropzone" id="dropzone">
+              <input id="file-input" type="file" multiple>
+              <div class="dropzone-content">
+                <div class="dropzone-icon">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                </div>
+                <p class="dropzone-label">Drop files here or <strong>browse</strong></p>
+                <p class="dropzone-hint">Supports PDF, TXT, DOCX, CSV, and more</p>
+              </div>
+            </label>
+            <div class="upload-actions">
+              <span class="file-count" id="file-count">No files selected</span>
+              <button type="submit" class="btn btn-primary" id="upload-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Upload & Index
+              </button>
+            </div>
+          </form>
+          <div class="upload-log-wrapper">
+            <pre id="upload-log" class="console-output"></pre>
+          </div>
+        </div>
+
+        <!-- Documents Panel -->
+        <div class="card card-documents">
+          <div class="card-header">
+            <div class="card-icon docs-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <h3>Indexed Documents</h3>
+            <button id="refresh-docs" type="button" class="btn btn-ghost btn-sm" title="Refresh document list">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"/>
+                <polyline points="1 20 1 14 7 14"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+              </svg>
+              Refresh
+            </button>
+          </div>
+          <div id="document-list" class="document-list">
+            <div class="empty-state">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+              <p>No documents indexed yet</p>
+              <p class="empty-hint">Upload files to get started</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== QUERY TAB ==================== -->
+    <section class="tab-content" id="tab-query">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Semantic Query</h2>
+          <p class="section-desc">Ask questions against your indexed knowledge base</p>
+        </div>
+      </div>
+
+      <div class="query-layout">
+        <!-- Query Form -->
+        <div class="card card-query">
+          <form id="query-form" class="query-form">
+            <div class="query-input-group">
+              <textarea id="question-input" rows="3" placeholder="Ask a question about your uploaded documents..." class="query-textarea"></textarea>
+              <div class="query-controls">
+                <div class="topk-group">
+                  <label for="top-k-input">Top-K</label>
+                  <input id="top-k-input" type="number" min="1" max="20" value="6" class="topk-input">
+                </div>
+                <button type="submit" class="btn btn-primary btn-query" id="query-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                  </svg>
+                  Run Query
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Answer -->
+          <div class="answer-section" id="answer-section" style="display:none;">
+            <div class="answer-header">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              <h3>Answer</h3>
+            </div>
+            <article id="answer-box" class="answer-content"></article>
+          </div>
+        </div>
+
+        <!-- Retrieved Context -->
+        <div class="card card-context" id="context-card" style="display:none;">
+          <div class="card-header">
+            <div class="card-icon context-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+            </div>
+            <h3>Retrieved Context</h3>
+            <span class="context-count" id="context-count"></span>
+          </div>
+          <div id="context-list" class="context-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== RAGAS TAB ==================== -->
+    <section class="tab-content" id="tab-ragas">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">RAGAS Evaluation</h2>
+          <p class="section-desc">Evaluate your RAG pipeline quality using Faithfulness, Answer Relevancy, Context Precision, and Context Recall</p>
+        </div>
+      </div>
+
+      <!-- RAGAS Overview Cards -->
+      <div class="ragas-overview">
+        <div class="metric-overview-card" id="metric-faithfulness">
+          <div class="metric-ring" data-metric="faithfulness">
+            <svg viewBox="0 0 80 80">
+              <circle class="ring-bg" cx="40" cy="40" r="34"/>
+              <circle class="ring-fill" cx="40" cy="40" r="34" data-ring="faithfulness"/>
+            </svg>
+            <span class="ring-value" id="val-faithfulness">—</span>
+          </div>
+          <div class="metric-info">
+            <h4>Faithfulness</h4>
+            <p>Factual consistency with retrieved context</p>
+          </div>
+        </div>
+
+        <div class="metric-overview-card" id="metric-answer-relevancy">
+          <div class="metric-ring" data-metric="answer_relevancy">
+            <svg viewBox="0 0 80 80">
+              <circle class="ring-bg" cx="40" cy="40" r="34"/>
+              <circle class="ring-fill" cx="40" cy="40" r="34" data-ring="answer_relevancy"/>
+            </svg>
+            <span class="ring-value" id="val-answer_relevancy">—</span>
+          </div>
+          <div class="metric-info">
+            <h4>Answer Relevancy</h4>
+            <p>Relevance of the answer to the question</p>
+          </div>
+        </div>
+
+        <div class="metric-overview-card" id="metric-context-precision">
+          <div class="metric-ring" data-metric="context_precision">
+            <svg viewBox="0 0 80 80">
+              <circle class="ring-bg" cx="40" cy="40" r="34"/>
+              <circle class="ring-fill" cx="40" cy="40" r="34" data-ring="context_precision"/>
+            </svg>
+            <span class="ring-value" id="val-context_precision">—</span>
+          </div>
+          <div class="metric-info">
+            <h4>Context Precision</h4>
+            <p>Precision of the retrieved context</p>
+          </div>
+        </div>
+
+        <div class="metric-overview-card" id="metric-context-recall">
+          <div class="metric-ring" data-metric="context_recall">
+            <svg viewBox="0 0 80 80">
+              <circle class="ring-bg" cx="40" cy="40" r="34"/>
+              <circle class="ring-fill" cx="40" cy="40" r="34" data-ring="context_recall"/>
+            </svg>
+            <span class="ring-value" id="val-context_recall">—</span>
+          </div>
+          <div class="metric-info">
+            <h4>Context Recall</h4>
+            <p>Coverage of reference in retrieved context</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Evaluation Input -->
+      <div class="ragas-input-section">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon ragas-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+            <h3>Evaluation Samples</h3>
+          </div>
+          <p class="ragas-instructions">
+            Provide evaluation samples as a JSON array. Each sample requires: <code>question</code>, <code>answer</code>, <code>ground_truth</code>, and <code>contexts</code> (array of strings).
+          </p>
+
+          <div class="ragas-template-actions">
+            <button type="button" class="btn btn-ghost btn-sm" id="load-template-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              Load Template
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm" id="clear-eval-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              Clear
+            </button>
+          </div>
+
+          <form id="eval-form" class="eval-form">
+            <div class="editor-wrapper">
+              <div class="editor-header">
+                <span class="editor-lang">JSON</span>
+                <span class="editor-hint" id="json-status">Valid JSON</span>
+              </div>
+              <textarea id="eval-input" rows="14" spellcheck="false">[
+  {
+    "question": "What does the document say about X?",
+    "answer": "The document states that X is ...",
+    "ground_truth": "X is defined as ...",
+    "contexts": ["Relevant chunk from the document about X..."]
+  }
+]</textarea>
+            </div>
+            <div class="eval-actions">
+              <button type="submit" class="btn btn-primary btn-eval" id="eval-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Run RAGAS Evaluation
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Evaluation Results -->
+        <div class="card" id="eval-results-card" style="display:none;">
+          <div class="card-header">
+            <div class="card-icon results-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            </div>
+            <h3>Evaluation Results</h3>
+          </div>
+          <pre id="eval-output" class="console-output"></pre>
+        </div>
+      </div>
+
+      <!-- RAGAS History -->
+      <div class="card ragas-history-card" id="ragas-history-card" style="display:none;">
+        <div class="card-header">
+          <div class="card-icon history-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <h3>Evaluation History</h3>
+          <button type="button" class="btn btn-ghost btn-sm" id="clear-history-btn">Clear All</button>
+        </div>
+        <div id="history-list" class="history-list"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
